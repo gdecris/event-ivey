@@ -154,7 +154,7 @@ class Worker
      */
     private function arrayGet(array $arr, $key, $default = null)
     {
-        return isset($arr[$key]) ?: $default;
+        return isset($arr[$key]) ? $arr[$key] : $default;
     }
 
     /**

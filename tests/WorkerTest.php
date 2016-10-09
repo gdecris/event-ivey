@@ -41,4 +41,14 @@ class WorkerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, $job['attempts']);
 
     }
+
+    public function test_it_can_run_queued_job()
+    {
+        $this->worker->getDispatcher()->listen('foo', TestListener::class);
+        $this->worker->getDispatcher()->fire('foo', ['test' => 'run']);
+
+        $this->worker->runNextJob();
+
+        $this->assertEquals('run', TestListener::$data['test']);
+    }
 }
