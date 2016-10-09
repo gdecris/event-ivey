@@ -1,4 +1,10 @@
-<phpunit bootstrap="vendor/autoload.php">
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+		bootstrap="vendor/autoload.php"
+		colors="true"
+        verbose="true"
+        processIsolation="false"
+>
 	<testsuites>
 		<testsuite name="event-ivey">
 			<directory>tests</directory>

@@ -2,6 +2,7 @@
 
 namespace Ivey\Events;
 
+use Illuminate\Container\Container;
 use Ivey\Events\Exceptions\EventListenerDidNotRun;
 use Ivey\Events\Exceptions\EventListenerNotCallable;
 use Exception;
@@ -33,6 +34,7 @@ class EventDispatcher
 	 */
 	public function __construct(QueueContract $queue) {
 		$this->queue = $queue;
+        $this->container = new Container();
 		$this->queue->boot();
 	}
 
@@ -159,7 +161,7 @@ class EventDispatcher
 			// Fire the event listener
 			if ( $this->isEventListener($listener, $reflection) ) {
 				$queued = $reflection->getStaticPropertyValue('should_queue');
-				make($listener)->setEventName($event_name)->fire($payload_data);
+				$this->container->make($listener)->setEventName($event_name)->fire($payload_data);
 			} else {
 				call_user_func_array($listener, [$payload_data]);
 			}
@@ -198,7 +200,7 @@ class EventDispatcher
 		$this->queue->push($this->queue_name, [
 			'event_name' => $event_name,
 			'listener' => $listener,
-			'data' => $payload,
+			'payload' => $payload,
 			'attempts' => $attempts
 		]);
 	}

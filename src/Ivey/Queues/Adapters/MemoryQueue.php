@@ -65,7 +65,7 @@ class MemoryQueue implements QueueContract
         return $this;
     }
 
-    public function &getValue($queue)
+    public function getValue($queue, $shift = false)
     {
         if ( $this->namespace ) {
             $position =& $this->queue[$this->namespace];
@@ -81,7 +81,7 @@ class MemoryQueue implements QueueContract
             $position =& $position[$key];
         }
 
-        return $position;
+        return $shift ? array_shift($position) : $position;
     }
 
     /**
@@ -90,8 +90,7 @@ class MemoryQueue implements QueueContract
      */
     public function pull($queue)
     {
-
-        return array_shift($this->getValue($queue));
+        return $this->getValue($queue, true);
     }
 
     /**
