@@ -21,10 +21,8 @@ class SqsQueue implements QueueContract
         $this->client = new SqsClient([
             'version' => $this->env('AWS_VERSION', 'latest'),
             'region'  => $this->env('AWS_REGION', 'us-east-1'),
-            'credentials' => [
-                'key' => $this->env('AWS_ACCESS_KEY_ID'),
-                'secret' => $this->env('AWS_SECRET_ACCESS_KEY')
-            ]
+            'key' => $this->env('AWS_ACCESS_KEY_ID'),
+            'secret' => $this->env('AWS_SECRET_ACCESS_KEY')
         ]);
     }
 
@@ -46,7 +44,12 @@ class SqsQueue implements QueueContract
      */
     public function push($queue, $payload)
     {
-        // TODO: Implement push() method.
+        $this->client->sendMessage([
+            'MessageBody' => serialize($payload),
+            'QueueUrl' => $this->env('SQS_QUEUE_URL')
+        ]);
+
+        return $this;
     }
 
     /**
@@ -55,7 +58,11 @@ class SqsQueue implements QueueContract
      */
     public function pull($queue)
     {
-        // TODO: Implement pull() method.
+        $message = $this->client->receiveMessage([
+            'QueueUrl' => $this->env('SQS_QUEUE_URL')
+        ]);
+
+        return unserialize($message['Messages'][0]['Body']);
     }
 
     /**
@@ -64,6 +71,20 @@ class SqsQueue implements QueueContract
      */
     public function all($queue)
     {
-        // TODO: Implement all() method.
+        return ["SQS adapter does not support all messages"];
+    }
+
+    /**
+     * @param $varname
+     * @param null $default
+     * @return null|string
+     */
+    private function env($varname, $default = null)
+    {
+        if ( $value = getenv($varname) ) {
+            return $value;
+        }
+
+        return $default;
     }
 }

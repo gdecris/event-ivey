@@ -4,7 +4,8 @@ use Ivey\Events\EventDispatcher;
 use Ivey\Queues\Adapters\MemoryQueue;
 use Ivey\Queues\Worker;
 
-require 'resources/TestListener.php';
+require_once 'resources/TestListener.php';
+
 /**
  * @property Worker worker
  */
