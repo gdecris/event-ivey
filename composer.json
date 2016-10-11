@@ -12,7 +12,9 @@
 		"php": "^5.59 || ^7.0",
 		"predis/predis": "^1.1",
 		"phpunit/phpunit": "^5.5",
-		"illuminate/container": "^5.1"
+		"illuminate/container": "^5.1",
+		"vlucas/phpdotenv": "^2.4",
+		"aws/aws-sdk-php": "^3.19"
 	},
 	"autoload": {
 		"psr-0" : {
