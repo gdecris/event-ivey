@@ -24,7 +24,7 @@ class SqsQueue implements QueueContract
             'key' => $this->env('AWS_ACCESS_KEY_ID'),
             'secret' => $this->env('AWS_SECRET_ACCESS_KEY')
         ]);
-        
+
         $this->setNamespace($this->env('SQS_QUEUE_URL'));
     }
 
