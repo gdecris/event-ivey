@@ -81,7 +81,11 @@ class EventDispatcher
 	 * @return mixed
 	 */
 	public function nextInQueue() {
-		return $this->queue->pull($this->queue_name);
+	    if ( $raw = $this->queue->pull($this->queue_name) ) {
+	        return unserialize($raw);
+        }
+
+        return $raw;
 	}
 
 	/**
@@ -197,12 +201,12 @@ class EventDispatcher
 	 * @param $attempts
 	 */
 	private function enqueue($event_name, $listener, $payload, $attempts = 0) {
-		$this->queue->push($this->queue_name, [
+		$this->queue->push($this->queue_name, serialize([
 			'event_name' => $event_name,
 			'listener' => $listener,
 			'payload' => $payload,
 			'attempts' => $attempts
-		]);
+		]));
 	}
 
 	/**

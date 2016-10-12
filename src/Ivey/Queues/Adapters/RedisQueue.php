@@ -44,7 +44,7 @@ class RedisQueue implements QueueContract {
 	 * @return $this
 	 */
 	public function push($queue, $payload) {
-		$this->connection->lpush($this->q($queue), serialize($payload));
+		$this->connection->lpush($this->q($queue), $payload);
 
 		return $this;
 	}
@@ -56,7 +56,7 @@ class RedisQueue implements QueueContract {
 	public function pull($queue) {
 		$payload = $this->connection->rpop($this->q($queue));
 
-		return unserialize($payload);
+		return $payload;
 	}
 
 	/**
@@ -69,7 +69,7 @@ class RedisQueue implements QueueContract {
 
 		$payloads = [];
 		for ( $j = $total - 1; $j >= 0; $j-- ) {
-			$payloads[] = unserialize($raw_payloads[$j]);
+			$payloads[] = $raw_payloads[$j];
 		}
 
 		return $payloads;
