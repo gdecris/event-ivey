@@ -47,7 +47,7 @@ class SqsQueue implements QueueContract
     public function push($queue, $payload)
     {
         $this->client->sendMessage([
-            'MessageBody' => serialize($payload),
+            'MessageBody' => $payload,
             'QueueUrl' => $this->namespace
         ]);
 
@@ -71,7 +71,7 @@ class SqsQueue implements QueueContract
             'ReceiptHandle' => $job['ReceiptHandle']
         ]);
 
-        return unserialize($job['Body']);
+        return $job['Body'];
     }
 
     /**
