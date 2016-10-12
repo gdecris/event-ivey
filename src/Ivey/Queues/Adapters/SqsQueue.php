@@ -24,6 +24,8 @@ class SqsQueue implements QueueContract
             'key' => $this->env('AWS_ACCESS_KEY_ID'),
             'secret' => $this->env('AWS_SECRET_ACCESS_KEY')
         ]);
+        
+        $this->setNamespace($this->env('SQS_QUEUE_URL'));
     }
 
     /**
@@ -46,7 +48,7 @@ class SqsQueue implements QueueContract
     {
         $this->client->sendMessage([
             'MessageBody' => serialize($payload),
-            'QueueUrl' => $this->env('SQS_QUEUE_URL')
+            'QueueUrl' => $this->namespace
         ]);
 
         return $this;
@@ -59,10 +61,17 @@ class SqsQueue implements QueueContract
     public function pull($queue)
     {
         $message = $this->client->receiveMessage([
-            'QueueUrl' => $this->env('SQS_QUEUE_URL')
+            'QueueUrl' => $this->namespace
         ]);
 
-        return unserialize($message['Messages'][0]['Body']);
+        $job = $message['Messages'][0];
+
+        $this->client->deleteMessage([
+            'QueueUrl' => $this->namespace,
+            'ReceiptHandle' => $job['ReceiptHandle']
+        ]);
+
+        return unserialize($job['Body']);
     }
 
     /**
