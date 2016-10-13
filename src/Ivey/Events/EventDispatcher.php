@@ -50,7 +50,7 @@ class EventDispatcher
 		}
 
 		if ( $this->isClosure($callable) ) {
-			$bind = new class { public $event_name; };
+			$bind = new EventStub();
 			$bind->event_name = $event_name;
 			$callable = $callable->bindTo($bind);
 		}
