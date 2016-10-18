@@ -9,7 +9,7 @@
 	],
 	"license": "MIT",
 	"require": {
-		"php": "^5.59 || ^7.0",
+		"php": "^5.5.9 || ^7.0",
 		"predis/predis": "^1.1",
 		"illuminate/container": "^5.1",
 		"aws/aws-sdk-php": "^3.19"
