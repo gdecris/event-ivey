@@ -52,4 +52,16 @@ class WorkerTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('run', TestListener::$data['test']);
     }
+
+    public function test_output_adapter()
+    {
+        $sample = '';
+        $this->worker->setOutputAdapter(function ($message) use (&$sample) {
+            $sample = $message;
+        });
+
+        $this->worker->runNextJob();
+
+        $this->assertNotEmpty($sample);
+    }
 }

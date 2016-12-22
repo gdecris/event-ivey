@@ -32,6 +32,11 @@ class Worker
     protected $tries = 5;
 
     /**
+     * @var \Closure
+     */
+    protected $output_adapter;
+
+    /**
      * Worker constructor.
      *
      * @param EventDispatcher $dispatcher
@@ -63,6 +68,19 @@ class Worker
         return $this;
     }
 
+    /**
+     * Set a closure to receive output
+     *
+     * @param \Closure $closure
+     */
+    public function setOutputAdapter(\Closure $closure)
+    {
+        $this->output_adapter = $closure;
+    }
+
+    /**
+     * Runs jobs in queue then sleeps
+     */
     public function runDaemon()
     {
         while ( true ) {
@@ -90,8 +108,11 @@ class Worker
         $job = $this->getNextJob();
 
         if ( false === $job ) {
+            $this->sendOutput("No jobs in queue");
             return;
         }
+
+        $this->sendOutput("Running next job in queue");
 
         try {
             $job = $this->extractJobInfo($job);
@@ -165,4 +186,15 @@ class Worker
         return $this->dispatcher;
     }
 
+    /**
+     * @param $message
+     */
+    private function sendOutput($message)
+    {
+        if ( !$this->output_adapter ) {
+            echo $message, "\n";
+        }
+
+        call_user_func_array($this->output_adapter, [$message]);
+    }
 }

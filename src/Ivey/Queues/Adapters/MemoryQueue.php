@@ -90,7 +90,7 @@ class MemoryQueue implements QueueContract
      */
     public function pull($queue)
     {
-        return $this->getValue($queue, true);
+        return ($value = $this->getValue($queue, true)) ? $value : false;
     }
 
     /**
