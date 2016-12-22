@@ -101,4 +101,15 @@ class MemoryQueue implements QueueContract
     {
         return $this->getValue($queue);
     }
+
+    /**
+     * Clears all messages in the queue
+     *
+     * @param $queue
+     * @return mixed
+     */
+    public function purge($queue)
+    {
+        $this->queue = [];
+    }
 }

@@ -73,20 +73,30 @@ class EventDispatcher
 	/**
 	 * Returns all items in the queue
 	 */
-	public function all() {
+	public function all()
+    {
 		return $this->queue->all($this->queue_name);
 	}
 
 	/**
 	 * @return mixed
 	 */
-	public function nextInQueue() {
+	public function nextInQueue()
+    {
 	    if ( $raw = $this->queue->pull($this->queue_name) ) {
 	        return unserialize($raw);
         }
 
         return $raw;
 	}
+
+    /**
+     * Purges all messages in the queue
+     */
+	public function purgeQueue()
+    {
+        $this->queue->purge($this->queue_name);
+    }
 
 	/**
 	 * @param $callable

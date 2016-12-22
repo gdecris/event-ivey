@@ -64,6 +64,10 @@ class SqsQueue implements QueueContract
             'QueueUrl' => $this->namespace
         ]);
 
+        if ( !isset($message['Messages']) ) {
+            return false;
+        }
+
         $job = $message['Messages'][0];
 
         $this->client->deleteMessage([
@@ -95,5 +99,18 @@ class SqsQueue implements QueueContract
         }
 
         return $default;
+    }
+
+    /**
+     * Clears all messages in the queue
+     *
+     * @param $queue
+     * @return mixed
+     */
+    public function purge($queue)
+    {
+        $this->client->purgeQueue([
+            'QueueUrl' => $this->namespace
+        ]);
     }
 }

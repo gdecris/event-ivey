@@ -2,6 +2,8 @@
 
 namespace Ivey\Queues\Adapters;
 
+use Ivey\Queues\Contracts\QueueContract;
+
 class RedisQueue implements QueueContract {
 	protected $namespace;
 	protected $connection;
@@ -74,4 +76,15 @@ class RedisQueue implements QueueContract {
 
 		return $payloads;
 	}
+
+    /**
+     * Clears all messages in the queue
+     *
+     * @param $queue
+     * @return mixed
+     */
+    public function purge($queue)
+    {
+        // TODO: Implement purge() method.
+    }
 }
