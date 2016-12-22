@@ -42,3 +42,15 @@ PHP Event System with queue driver support
       }
   }
 ```
+
+## Worker
+### Running the worker
+```
+  $worker = $container->make(Worker::class);
+  
+  
+  // Sleep for 5 seconds retry a max of 3 times before failing
+  $worker->setSleep(5)
+      ->setTries(3)
+      ->runDaemon();
+```
