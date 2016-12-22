@@ -72,10 +72,13 @@ class Worker
      * Set a closure to receive output
      *
      * @param \Closure $closure
+     * @return $this
      */
     public function setOutputAdapter(\Closure $closure)
     {
         $this->output_adapter = $closure;
+
+        return $this;
     }
 
     /**
