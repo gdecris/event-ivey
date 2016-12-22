@@ -54,3 +54,10 @@ PHP Event System with queue driver support
       ->setTries(3)
       ->runDaemon();
 ```
+### Failed jobs
+```
+  // Add a listener for catching the failed jobs so you can handle them accordingly
+  $container->make(EventDispatcher::class)->listen('failed.job', function ($payload) {
+  
+  });
+```
