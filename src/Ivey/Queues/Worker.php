@@ -196,6 +196,7 @@ class Worker
     {
         if ( !$this->output_adapter ) {
             echo $message, "\n";
+            return;
         }
 
         call_user_func_array($this->output_adapter, [$message]);
