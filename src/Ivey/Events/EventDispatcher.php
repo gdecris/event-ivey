@@ -170,13 +170,14 @@ class EventDispatcher
 	 */
 	public function fireListener($event_name, $listener, $payload_data, $attempts = 0) {
 		$queued = false;
+		$listener_instance = null;
 
 		try {
 			// Fire the event listener
 			if ( $this->isEventListener($listener, $reflection) ) {
 				$queued = $reflection->getStaticPropertyValue('should_queue');
-				$listener = $this->container->make($listener);
-				$listener->setEventName($event_name)->fire($payload_data);
+				$listener_instance = $this->container->make($listener);
+                $listener_instance->setEventName($event_name)->fire($payload_data);
 			} else {
 				call_user_func_array($listener, [$payload_data]);
 			}
@@ -185,21 +186,21 @@ class EventDispatcher
 		} catch ( \Exception $e ) {
 			// Catch Exceptions in the Listener
 			if ( $queued ) {
-				$this->requeue($event_name, $listener, $payload_data, $attempts, $e);
+				$this->requeue($event_name, $listener, $payload_data, $attempts, $e, $listener_instance);
 				return true;
 			}
 
 			$listener_error = "EventListener exception thrown and is not configured be re-queued: [event_name: {$event_name}]";
-			$this->didNotRun($listener_error, $e, $listener);
+			$this->didNotRun($listener_error, $e, $listener_instance);
 		} catch ( \Error $e ) {
 			// Catch Errors in the listener
 			if ( $queued ) {
-				$this->requeue($event_name, $listener, $payload_data, $attempts, $e);
+				$this->requeue($event_name, $listener, $payload_data, $attempts, $e, $listener_instance);
 				return true;
 			}
 
 			$listener_error = "EventListener has ERRORS and is not configured be re-queued: [event_name: {$event_name}]";
-            $this->didNotRun($listener_error, $e, $listener);
+            $this->didNotRun($listener_error, $e, $listener_instance);
 		}
 
 		return false;
@@ -220,19 +221,21 @@ class EventDispatcher
 		]));
 	}
 
-	/**
-	 * Re-queue the event
-	 * @param $event_name
-	 * @param $listener
-	 * @param $payload
-	 * @param $attempts
-	 * @param $e
-	 * @throws EventListenerDidNotRun
-	 */
-	private function requeue($event_name, $listener, $payload, $attempts, &$e) {
+    /**
+     * Re-queue the event
+     *
+     * @param $event_name
+     * @param $listener
+     * @param $payload
+     * @param $attempts
+     * @param $e
+     * @param $listener_instance
+     * @throws EventListenerDidNotRun
+     */
+	private function requeue($event_name, $listener, $payload, $attempts, &$e, $listener_instance) {
 		$attempts++;
 		if ( $attempts >= $this->retry_limit ) {
-		    $this->didNotRun('Listener has reached the max retry attempts and can not be requeued', $e, $listener);
+		    $this->didNotRun('Listener has reached the max retry attempts and can not be requeued', $e, $listener_instance);
 		}
 
 		$this->enqueue($event_name, $listener, $payload, ($attempts + 1));
@@ -248,13 +251,13 @@ class EventDispatcher
     /**
      * @param $message
      * @param $e
-     * @param $listener
+     * @param $listener_instance
      * @throws EventListenerDidNotRun
      */
-    private function didNotRun($message, $e, $listener)
+    private function didNotRun($message, $e, $listener_instance)
     {
         $exception = new EventListenerDidNotRun($message, 0, $e);
-        $exception->listener = $listener;
+        $exception->listener = $listener_instance;
         throw $exception;
     }
 }

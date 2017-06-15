@@ -31,7 +31,7 @@ class SqsQueueTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('bar', TestListener::$data['sqstest']);
     }
-    
+
 // Commenting this out since you can only purge so many times before aws yells
 //    public function test_it_can_purge_and_return_false_on_empty_queue()
 //    {
