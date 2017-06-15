@@ -175,13 +175,14 @@ class EventDispatcher
 			// Fire the event listener
 			if ( $this->isEventListener($listener, $reflection) ) {
 				$queued = $reflection->getStaticPropertyValue('should_queue');
-				$this->container->make($listener)->setEventName($event_name)->fire($payload_data);
+				$listener = $this->container->make($listener);
+				$listener->setEventName($event_name)->fire($payload_data);
 			} else {
 				call_user_func_array($listener, [$payload_data]);
 			}
 
 			return true;
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			// Catch Exceptions in the Listener
 			if ( $queued ) {
 				$this->requeue($event_name, $listener, $payload_data, $attempts, $e);
@@ -189,8 +190,8 @@ class EventDispatcher
 			}
 
 			$listener_error = "EventListener exception thrown and is not configured be re-queued: [event_name: {$event_name}]";
-			throw new EventListenerDidNotRun($listener_error, 0, $e);
-		} catch ( Error $e ) {
+			$this->didNotRun($listener_error, $e, $listener);
+		} catch ( \Error $e ) {
 			// Catch Errors in the listener
 			if ( $queued ) {
 				$this->requeue($event_name, $listener, $payload_data, $attempts, $e);
@@ -198,7 +199,7 @@ class EventDispatcher
 			}
 
 			$listener_error = "EventListener has ERRORS and is not configured be re-queued: [event_name: {$event_name}]";
-			throw new EventListenerDidNotRun($listener_error, 0, $e);
+            $this->didNotRun($listener_error, $e, $listener);
 		}
 
 		return false;
@@ -230,9 +231,10 @@ class EventDispatcher
 	 */
 	private function requeue($event_name, $listener, $payload, $attempts, &$e) {
 		$attempts++;
-		if ( $attempts > $this->retry_limit ) {
-			throw new EventListenerDidNotRun('Listener has reached the max retry attempts and can not be requeued', 0, $e);
+		if ( $attempts >= $this->retry_limit ) {
+		    $this->didNotRun('Listener has reached the max retry attempts and can not be requeued', $e, $listener);
 		}
+
 		$this->enqueue($event_name, $listener, $payload, ($attempts + 1));
 	}
 
@@ -242,4 +244,17 @@ class EventDispatcher
 	public function setRetryLimit($retry_limit) {
 		$this->retry_limit = $retry_limit;
 	}
+
+    /**
+     * @param $message
+     * @param $e
+     * @param $listener
+     * @throws EventListenerDidNotRun
+     */
+    private function didNotRun($message, $e, $listener)
+    {
+        $exception = new EventListenerDidNotRun($message, 0, $e);
+        $exception->listener = $listener;
+        throw $exception;
+    }
 }

@@ -4,6 +4,7 @@ namespace Ivey\Queues;
 
 
 use Ivey\Events\EventDispatcher;
+use Ivey\Events\EventListener;
 use Ivey\Events\Exceptions\EventListenerDidNotRun;
 use Ivey\Events\Exceptions\EventListenerNotCallable;
 
@@ -64,6 +65,7 @@ class Worker
     public function setTries($tries)
     {
         $this->tries = $tries;
+        $this->dispatcher->setRetryLimit($tries);
 
         return $this;
     }
@@ -160,8 +162,19 @@ class Worker
      * @param $job
      * @param $exception
      */
-    private function jobFailed($job, $exception)
+    private function jobFailed($job, \Exception $exception)
     {
+        $this->sendOutput($exception->getMessage());
+
+        // See if the listener has a failed method that we can notify of the failure
+        if ( property_exists($exception, 'listener') && $exception->listener instanceof EventListener ) {
+            if ( method_exists($exception->listener, 'failed') ) {
+                $this->sendOutput('Sending failed info to listeners failed method');
+                call_user_func_array([$exception->listener, 'failed'], [compact('job', 'exception')]);
+            }
+        }
+
+        // Dispatch a failed job event
         $this->dispatcher->fire(
             'failed.job',
             compact('job', 'exception')

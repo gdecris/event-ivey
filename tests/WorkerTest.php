@@ -5,6 +5,7 @@ use Ivey\Queues\Adapters\MemoryQueue;
 use Ivey\Queues\Worker;
 
 require_once 'resources/TestListener.php';
+require_once 'resources/FailingListener.php';
 
 /**
  * @property Worker worker
@@ -51,6 +52,17 @@ class WorkerTest extends PHPUnit_Framework_TestCase
         $this->worker->runNextJob();
 
         $this->assertEquals('run', TestListener::$data['test']);
+    }
+
+    public function test_it_can_fail()
+    {
+        $this->worker->getDispatcher()->listen('foo', FailingListener::class);
+        $this->worker->getDispatcher()->fire('foo', ['test' => 'run']);
+
+        $this->worker->setTries(1)
+            ->runNextJob();
+
+        $this->assertNotEmpty(FailingListener::$failed_message);
     }
 
     public function test_output_adapter()
