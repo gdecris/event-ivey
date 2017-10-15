@@ -61,7 +61,8 @@ class SqsQueue implements QueueContract
     public function pull($queue)
     {
         $message = $this->client->receiveMessage([
-            'QueueUrl' => $this->namespace
+            'QueueUrl' => $this->namespace,
+            'MaxNumberOfMessages' => 1
         ]);
 
         if ( !isset($message['Messages']) ) {
@@ -70,12 +71,22 @@ class SqsQueue implements QueueContract
 
         $job = $message['Messages'][0];
 
+        $this->_deleteMessage($job);
+
+        return unserialize($job['Body']);
+    }
+
+    /**
+     * Deletes a jobs message from the queue
+     *
+     * @param $job
+     */
+    private function _deleteMessage($job)
+    {
         $this->client->deleteMessage([
             'QueueUrl' => $this->namespace,
             'ReceiptHandle' => $job['ReceiptHandle']
         ]);
-
-        return unserialize($job['Body']);
     }
 
     /**

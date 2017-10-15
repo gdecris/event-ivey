@@ -32,6 +32,22 @@ class SqsQueueTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('bar', TestListener::$data['sqstest']);
     }
 
+    public function test_it_can_send_multiple_messages()
+    {
+        $worker = (new Worker($this->dispatcher))->setTries(3);
+        $this->dispatcher->listen('event.name', TestListener::class);
+
+        $this->dispatcher->fire('event.name', ['sqstest' => 'bar']);
+        $worker->runNextJob();
+
+        $this->assertEquals('bar', TestListener::$data['sqstest']);
+
+        $this->dispatcher->fire('event.name', ['sqstest' => 'foo']);
+        $worker->runNextJob();
+
+        $this->assertEquals('foo', TestListener::$data['sqstest']);
+    }
+
 // Commenting this out since you can only purge so many times before aws yells
 //    public function test_it_can_purge_and_return_false_on_empty_queue()
 //    {
